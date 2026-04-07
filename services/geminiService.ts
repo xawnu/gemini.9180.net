@@ -8,10 +8,8 @@ export const generateScenePrompt = async (
   apiKeyOverride?: string,
   systemInstruction?: string
 ): Promise<string> => {
-  // Only use user-provided API key - no built-in key for security
+  // Use user-provided API key if given, otherwise the backend will use the pool key
   const apiKey = apiKeyOverride || '';
-  
-  if (!apiKey) throw new Error("NO_API_KEY");
 
   try {
     // Clean base64 strings and build data URLs
@@ -22,35 +20,30 @@ export const generateScenePrompt = async (
       ? endFrameBase64 
       : `data:image/jpeg;base64,${endFrameBase64}`;
 
-    const response = await fetch(KIE_API_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        messages: [
-          {
-            role: 'system',
-            content: systemInstruction || "You are an expert creative director for AI video generation. Your goal is to write prompts that perfectly describe the visual flow between two keyframes."
-          },
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: 'Here is the START frame of the video scene:' },
-              {
-                type: 'image_url',
-                image_url: { url: cleanStart }
-              },
-              { type: 'text', text: 'Here is the END frame of the video scene:' },
-              {
-                type: 'image_url',
-                image_url: { url: cleanEnd }
-              },
-              {
-                type: 'text',
-                text: `Task: Generate a highly accurate video generation prompt based on these two frames using the template below.
-             
+    // Ensure data payload structure matches exactly what our backend proxy expects to forward
+    const payload = {
+      messages: [
+        {
+          role: 'system',
+          content: systemInstruction || "You are an expert creative director for AI video generation. Your goal is to write prompts that perfectly describe the visual flow between two keyframes."
+        },
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: 'Here is the START frame of the video scene:' },
+            {
+              type: 'image_url',
+              image_url: { url: cleanStart }
+            },
+            { type: 'text', text: 'Here is the END frame of the video scene:' },
+            {
+              type: 'image_url',
+              image_url: { url: cleanEnd }
+            },
+            {
+              type: 'text',
+              text: `Task: Generate a highly accurate video generation prompt based on these two frames using the template below.
+           
 1. Analyze the START frame to describe the initial subject, environment, and lighting condition.
 2. Analyze the END frame to understand how the scene has progressed (camera movement, subject action, lighting shift).
 3. Fill in the template to describe this specific progression from start to finish.
@@ -61,11 +54,25 @@ Instructions:
 - The [action] must describe the movement bridging the two frames.
 - The [subject] must match the visual evidence in the frames.
 - Output ONLY the completed prompt text.`
-              }
-            ]
-          }
-        ],
-        temperature: 0.7,
+            }
+          ]
+        }
+      ],
+      temperature: 0.7,
+    };
+
+    // Determine the correct base URL. When running locally via Vite preview/dev, this will hit localhost.
+    // When deployed using server.js, the relative URL maps precisely to server.js's node endpoint.
+    const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3026' : '';
+
+    const response = await fetch(`${baseUrl}/api/generate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...payload,
+        customApiKey: apiKey // Send to backend to override default key if present
       }),
     });
 

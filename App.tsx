@@ -268,11 +268,7 @@ function App() {
         generatedPrompt: prompt
       } : s));
     } catch (e: any) {
-      if (e?.message === 'NO_API_KEY') {
-        setIsSettingsOpen(true);
-      } else {
-        console.error("Error regenerating prompt", e);
-      }
+      console.error("Error regenerating prompt", e);
       setScenes(prev => prev.map(s => s.id === id ? { ...s, isProcessing: false } : s));
     }
   };
@@ -368,12 +364,6 @@ function App() {
           } : s));
 
         } catch (e: any) {
-          if (e?.message === 'NO_API_KEY') {
-            setIsSettingsOpen(true);
-            setScenes(current => current.map((s, idx) => idx === i ? { ...s, isProcessing: false } : s));
-            setStatus({ stage: 'idle', progress: 0 });
-            return; // Stop the entire generation loop
-          }
           console.error("Error generating prompt for scene " + i, e);
           setScenes(current => current.map((s, idx) => idx === i ? { ...s, isProcessing: false } : s));
         }
@@ -510,15 +500,11 @@ function App() {
             {/* API Key Button */}
             <button
               onClick={() => setIsSettingsOpen(true)}
-              className={`text-sm px-3 py-1.5 rounded-lg transition-colors flex items-center gap-2 border
-                   ${customApiKey
-                  ? 'bg-yellow-50 border-yellow-200 text-yellow-600 hover:bg-yellow-100 dark:bg-yellow-500/10 dark:border-yellow-500/30 dark:text-yellow-500 dark:hover:bg-yellow-500/20'
-                  : 'border-gray-200 bg-gray-100 text-gray-600 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:text-white dark:hover:border-gray-600'
-                }`}
+              className={`text-sm px-3 py-1.5 rounded-lg transition-colors flex items-center gap-2 border border-gray-200 bg-gray-100 text-gray-600 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:text-white dark:hover:border-gray-600`}
               title="Configure API Key"
             >
               <Key className="w-4 h-4" />
-              <span className="hidden sm:inline">API Key</span>
+              <span className="hidden sm:inline">Settings</span>
             </button>
 
             {/* Logout Button */}
@@ -544,25 +530,6 @@ function App() {
 
       <main className="max-w-7xl mx-auto px-4 py-8">
 
-        {/* API Key Missing Banner */}
-        {!customApiKey && (
-          <div className="mb-6 p-4 border rounded-xl flex items-center gap-4 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-500/30 animate-in fade-in slide-in-from-top-2">
-            <div className="p-2 rounded-lg shrink-0 bg-blue-100 dark:bg-blue-900/50">
-              <Key className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm text-blue-800 dark:text-blue-200">
-                <strong>API Key Required</strong> — Please set your Kie.ai API Key before generating prompts.
-              </p>
-            </div>
-            <button
-              onClick={() => setIsSettingsOpen(true)}
-              className="shrink-0 text-sm font-medium px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-colors"
-            >
-              Set Key
-            </button>
-          </div>
-        )}
 
         {/* Error Display */}
         {renderError()}

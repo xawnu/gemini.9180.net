@@ -52,7 +52,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, customAp
             {/* Custom Key Section */}
             <div className="space-y-3">
                 <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block">
-                    Kie.ai API Key <span className="text-red-500">*</span>
+                    Personal Override Key <span className="text-gray-400 font-normal">(Optional)</span>
                 </label>
                 <div className="relative">
                     <input 
@@ -64,9 +64,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, customAp
                     />
                 </div>
                 <p className="text-xs text-gray-500">
-                    You need a Kie.ai API Key to use this tool (uses Gemini 2.5 Flash). 
+                    If left blank, the application will use the default shared Team API Key from the server.
                     <a href="https://kie.ai/market" target="_blank" rel="noreferrer" className="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 ml-1 inline-flex items-center gap-0.5">
-                        Get a key <ExternalLink className="w-2.5 h-2.5" />
+                        Get your own <ExternalLink className="w-2.5 h-2.5" />
                     </a>
                 </p>
             </div>
