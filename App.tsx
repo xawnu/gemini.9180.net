@@ -10,7 +10,6 @@ import { Scene, ProcessingStatus, VideoSource } from './types';
 import { Clapperboard, Sparkles, AlertTriangle, Play, Wand2, Download, ChevronDown, Square, Loader2, Save, Plus, Info, Key, Trash2, Undo, Redo, Sun, Moon, LogOut } from 'lucide-react';
 
 const DEFAULT_TEMPLATE = "A cinematic shot of [subject], [action], lighting is [lighting], mood is [mood], style of [style]";
-const ACCESS_CODE = "gemini2026"; // Simple client-side access code
 
 // Simplified initial templates - effectively treated as user content now
 const INITIAL_TEMPLATES = [
@@ -85,11 +84,23 @@ function App() {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
 
-  const handleLogin = (password: string) => {
-    if (password === ACCESS_CODE) {
-      localStorage.setItem('app_auth_token', 'valid');
-      setIsAuthenticated(true);
-      return true;
+  const handleLogin = async (password: string) => {
+    try {
+      const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3026' : '';
+      const response = await fetch(`${baseUrl}/api/verify-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        localStorage.setItem('app_auth_token', 'valid');
+        setIsAuthenticated(true);
+        return true;
+      }
+    } catch(e) {
+      console.error("Login Error:", e);
     }
     return false;
   };

@@ -65,6 +65,18 @@ app.post('/api/generate', async (req, res) => {
     }
 });
 
+// Password verification Endpoint
+app.post('/api/verify-password', (req, res) => {
+    const { password } = req.body;
+    // Get password from .env, fallback to original if not set
+    const serverPassword = process.env.ACCESS_PASSWORD || "gemini2026";
+    if (password === serverPassword) {
+        res.json({ success: true });
+    } else {
+        res.status(401).json({ success: false, error: "Invalid password" });
+    }
+});
+
 // Serve static frontend files from 'dist'
 const distPath = path.join(__dirname, 'dist');
 app.use(express.static(distPath));
