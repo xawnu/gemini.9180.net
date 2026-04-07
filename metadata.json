@@ -1,0 +1,5 @@
+{
+  "name": "Gemini Video Scene Analyst",
+  "description": "Analyzes video scenes, captures start/end frames, and generates creative prompts using Gemini Vision.",
+  "requestFramePermissions": []
+}
